@@ -4,8 +4,8 @@
 # formatter: shfmt -ci -i 2
 
 argparse() {
-  argparse_index=1
-  argparse="while [ \$# -gt 0 ]; do case \"\$1\" in --) shift && break ;;"
+  argparse='argparse_count=$#; while [ $# -gt 0 ]; do case $1 in'
+  argparse="$argparse --) shift && break ;;"
   while [ $# -gt 0 ]; do
     case "$1,$2" in
       -*=,[-:]*) argparse="$argparse $1*) ${1#"${1%%[!-]*}"}\${1#*=} ;;" ;;
@@ -15,7 +15,7 @@ argparse() {
       :*,*) break ;;
       *,*) echo "argparse: invalid parameter: $1" >&2 && exit 1 ;;
     esac
-    argparse_index=$((argparse_index + 1)) && shift
+    shift
   done
   argparse="$argparse -*) echo \"argparse: unknown option: \${1%%=*}\" >&2"
   argparse="$argparse && exit 1 ;; *) break ;; esac; shift; done;"
@@ -25,10 +25,10 @@ argparse() {
       :*) argparse="$argparse ${1#:}=\$1 && shift;" ;;
       *) echo "argparse: invalid parameter: $1" >&2 && exit 1 ;;
     esac
-    argparse_index=$((argparse_index + 1)) && shift
+    shift
   done
   eval "$argparse"
-  set -- $((argparse_index - 1))
-  unset argparse argparse_index
+  set -- "$((argparse_count - $#))"
+  unset argparse argparse_count
   return "$1"
 }
